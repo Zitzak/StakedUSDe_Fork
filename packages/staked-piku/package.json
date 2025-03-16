@@ -1,0 +1,16 @@
+{
+  "name": "staked-piku",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test",
+    "deploy": "forge script",
+    "generate-abis": "node scripts/generate-abis.js",
+    "clean": "forge clean"
+  },
+  "devDependencies": {
+    "fs-extra": "^11.1.1",
+    "glob": "^10.3.3"
+  }
+}

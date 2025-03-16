@@ -1,0 +1,60 @@
+{
+  "name": "merkle-distribution",
+  "version": "0.0.2",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:1inch/merkle-distribution.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@1inch/solidity-utils": "5.2.3",
+    "@openzeppelin/contracts": "5.0.2",
+    "adm-zip": "^0.5.12"
+  },
+  "devDependencies": {
+    "@metamask/eth-sig-util": "7.0.1",
+    "@nomicfoundation/hardhat-chai-matchers": "2.0.6",
+    "@nomicfoundation/hardhat-ethers": "3.0.5",
+    "@nomicfoundation/hardhat-verify": "2.0.5",
+    "chai": "4.4.0",
+    "commander": "12.0.0",
+    "dotenv": "16.4.5",
+    "eslint": "8.57.0",
+    "eslint-config-standard": "17.1.0",
+    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-n": "16.6.2",
+    "eslint-plugin-promise": "6.1.1",
+    "eslint-plugin-standard": "5.0.0",
+    "ethereumjs-wallet": "^1.0.2",
+    "ethers": "6.11.1",
+    "hardhat": "2.22.2",
+    "hardhat-dependency-compiler": "1.1.4",
+    "hardhat-deploy": "0.12.2",
+    "hardhat-gas-reporter": "2.0.2",
+    "keccak256": "1.0.6",
+    "merkletreejs": "0.3.11",
+    "qr-image": "3.2.0",
+    "rimraf": "5.0.5",
+    "solhint": "4.5.2",
+    "solidity-coverage": "0.8.11"
+  },
+  "scripts": {
+    "clean": "rimraf artifacts cache coverage coverage.json",
+    "coverage": "hardhat coverage",
+    "deploy": "hardhat deploy --network",
+    "deploy:test": "hardhat deploy",
+    "lk:deploy": "hardhat deploy:qr --network",
+    "qr:create": "node ./src/qrdrop.js -gqlczv",
+    "lk:create": "node ./src/qrdrop.js -glcv",
+    "lk:check": "node ./src/qrdrop.js -x",
+    "lint": "yarn run lint:js && yarn run lint:sol",
+    "lint:fix": "yarn run lint:js:fix && yarn run lint:sol:fix",
+    "lint:js": "eslint .",
+    "lint:js:fix": "eslint . --fix",
+    "lint:sol": "solhint --max-warnings 0 \"contracts/**/*.sol\"",
+    "lint:sol:fix": "solhint --max-warnings 0 \"contracts/**/*.sol\" --fix",
+    "test": "hardhat test",
+    "genqr": "node ./src/qrdrop.js"
+  }
+}

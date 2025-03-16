@@ -1,0 +1,14 @@
+{
+    "name": "shared-abi",
+    "version": "1.0.0",
+    "private": true,
+    "main": "index.js",
+    "scripts": {
+      "build": "echo 'Nothing to build'",
+      "generate-abis": "node scripts/consolidate-abis.js"
+    },
+    "devDependencies": {
+      "fs-extra": "^11.1.1",
+      "glob": "^10.3.3"
+    }
+  }

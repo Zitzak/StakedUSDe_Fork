@@ -1,0 +1,32 @@
+[profile.default]
+src = "src"
+out = "out"
+optimizer = true
+optimizer_runs = 20000
+libs = ["lib"]
+test = 'test/foundry'
+cache_path = 'forge-cache'
+fs_permissions = [{ access = "read", path = "./out"}]
+evm_version = "shanghai"
+solc = "0.8.19"
+
+remappings = [
+    "ds-test/=lib/forge-std/lib/ds-test/src/",
+    "forge-std/=lib/forge-std/src/",
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+    "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+    "@aave/core-v3=lib/aave-v3-core/",
+    "@bgd-helpers=lib/aave-helpers/src/",
+    "solidity-utils/=lib/solidity-utils/src/"
+]
+
+[fmt]
+line_length = 120
+tab_width = 4
+bracket_spacing = true
+
+[rpc_endpoints]
+sepolia = "${SEPOLIA_RPC_URL}"
+
+[etherscan]
+sepolia = { key = "${ETHERSCAN_API_KEY}" }

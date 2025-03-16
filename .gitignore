@@ -17,6 +17,7 @@ yarn-error.log*
 !.yarn/sdks
 !.yarn/versions
 .pnp.*
+.turbo/*
 
 # Build outputs
 dist

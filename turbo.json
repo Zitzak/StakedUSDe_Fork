@@ -1,0 +1,22 @@
+{
+    "$schema": "https://turbo.build/schema.json",
+    "globalDependencies": [".env"],
+    "pipeline": {
+      "build": {
+        "dependsOn": ["^build"],
+        "outputs": ["out/**", "artifacts/**", "cache/**"]
+      },
+      "test": {
+        "dependsOn": ["build"],
+        "outputs": []
+      },
+      "deploy": {
+        "dependsOn": ["build", "test"],
+        "outputs": ["deployments/**"]
+      },
+      "generate-abis": {
+        "dependsOn": ["build"],
+        "outputs": ["packages/shared-abi/abis/**"]
+      }
+    }
+  }
