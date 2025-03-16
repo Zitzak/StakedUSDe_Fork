@@ -13,6 +13,7 @@
     "generate-abis": "turbo run generate-abis"
   },
   "devDependencies": {
-    "turbo": "^1.10.16"
-  }
+    "turbo": "^2.4.4"
+  },
+  "packageManager": "yarn@1.22.18"
 }
