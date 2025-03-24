@@ -1,23 +1,23 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity 0.8.19;
 
-import "contracts/stakedPiku/StakedUSDe.sol";
-import "contracts/interfaces/IStakedUSDeCooldown.sol";
-import "contracts/stakedPiku/USDeSilo.sol";
+import "contracts/stakedPiku/StakedPiku.sol";
+import "contracts/interfaces/IStakedPikuCooldown.sol";
+import "contracts/stakedPiku/PikuSilo.sol";
 
 /**
- * @title StakedUSDeV2
- * @notice The StakedUSDeV2 contract allows users to stake USDe tokens and earn a portion of protocol LST and perpetual yield that is allocated
+ * @title StakedPikuV2
+ * @notice The StakedPikuV2 contract allows users to stake PIKU tokens and earn a portion of protocol LST and perpetual yield that is allocated
  * to stakers by the Ethena DAO governance voted yield distribution algorithm.  The algorithm seeks to balance the stability of the protocol by funding
  * the protocol's insurance fund, DAO activities, and rewarding stakers with a portion of the protocol's yield.
- * @dev If cooldown duration is set to zero, the StakedUSDeV2 behavior changes to follow ERC4626 standard and disables cooldownShares and cooldownAssets methods. If cooldown duration is greater than zero, the ERC4626 withdrawal and redeem functions are disabled, breaking the ERC4626 standard, and enabling the cooldownShares and the cooldownAssets functions.
+ * @dev If cooldown duration is set to zero, the StakedPikuV2 behavior changes to follow ERC4626 standard and disables cooldownShares and cooldownAssets methods. If cooldown duration is greater than zero, the ERC4626 withdrawal and redeem functions are disabled, breaking the ERC4626 standard, and enabling the cooldownShares and the cooldownAssets functions.
  */
-contract StakedUSDeV2 is IStakedUSDeCooldown, StakedUSDe {
+contract StakedPikuV2 is IStakedPikuCooldown, StakedPiku {
   using SafeERC20 for IERC20;
 
   mapping(address => UserCooldown) public cooldowns;
 
-  USDeSilo public silo;
+  PikuSilo public silo;
 
   uint24 public MAX_COOLDOWN_DURATION = 30 days;
 
@@ -35,12 +35,12 @@ contract StakedUSDeV2 is IStakedUSDeCooldown, StakedUSDe {
     _;
   }
 
-  /// @notice Constructor for StakedUSDeV2 contract.
-  /// @param _asset The address of the USDe token.
+  /// @notice Constructor for StakedPikuV2 contract.
+  /// @param _asset The address of the PIKU token.
   /// @param initialRewarder The address of the initial rewarder.
   /// @param owner The address of the admin role.
-  constructor(IERC20 _asset, address initialRewarder, address owner) StakedUSDe(_asset, initialRewarder, owner) {
-    silo = new USDeSilo(address(this), address(_asset));
+  constructor(IERC20 _asset, address initialRewarder, address owner) StakedPiku(_asset, initialRewarder, owner) {
+    silo = new PikuSilo(address(this), address(_asset));
     cooldownDuration = MAX_COOLDOWN_DURATION;
   }
 
@@ -121,7 +121,7 @@ contract StakedUSDeV2 is IStakedUSDeCooldown, StakedUSDe {
     return assets;
   }
 
-  /// @notice Set cooldown duration. If cooldown duration is set to zero, the StakedUSDeV2 behavior changes to follow ERC4626 standard and disables cooldownShares and cooldownAssets methods. If cooldown duration is greater than zero, the ERC4626 withdrawal and redeem functions are disabled, breaking the ERC4626 standard, and enabling the cooldownShares and the cooldownAssets functions.
+  /// @notice Set cooldown duration. If cooldown duration is set to zero, the StakedPikuV2 behavior changes to follow ERC4626 standard and disables cooldownShares and cooldownAssets methods. If cooldown duration is greater than zero, the ERC4626 withdrawal and redeem functions are disabled, breaking the ERC4626 standard, and enabling the cooldownShares and the cooldownAssets functions.
   /// @param duration Duration of the cooldown
   function setCooldownDuration(uint24 duration) external onlyRole(DEFAULT_ADMIN_ROLE) {
     if (duration > MAX_COOLDOWN_DURATION) {

@@ -3,21 +3,21 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "contracts/interfaces/IUSDeSiloDefinitions.sol";
+import "contracts/interfaces/IPikuSiloDefinitions.sol";
 
 /**
- * @title USDeSilo
- * @notice The Silo allows to store USDe during the stake cooldown process.
+ * @title PikuSilo
+ * @notice The Silo allows to store PIKU during the stake cooldown process.
  */
-contract USDeSilo is IUSDeSiloDefinitions {
+contract PikuSilo is IPikuSiloDefinitions {
   using SafeERC20 for IERC20;
 
   address immutable STAKING_VAULT;
-  IERC20 immutable USDE;
+  IERC20 immutable PIKU;
 
-  constructor(address stakingVault, address usde) {
+  constructor(address stakingVault, address piku) {
     STAKING_VAULT = stakingVault;
-    USDE = IERC20(usde);
+    PIKU = IERC20(piku);
   }
 
   modifier onlyStakingVault() {
@@ -26,6 +26,6 @@ contract USDeSilo is IUSDeSiloDefinitions {
   }
 
   function withdraw(address to, uint256 amount) external onlyStakingVault {
-    USDE.transfer(to, amount);
+    PIKU.transfer(to, amount);
   }
 }

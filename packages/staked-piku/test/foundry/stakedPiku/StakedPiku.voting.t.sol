@@ -4,16 +4,16 @@ pragma solidity >=0.8;
 import {console} from "forge-std/console.sol";
 import "forge-std/Test.sol";
 
-import "contracts/token/USDe.sol";
-import "test/foundry/stakedPiku/mocks/StakedUSDeMock_Exposed.sol";
+import "contracts/token/PIKU.sol";
+import "test/foundry/stakedPiku/mocks/StakedPikuMock_Exposed.sol";
 
 
 // This contract has duplicate tests for ERC20MultiVotes.t.sol. However the contract tested is
-// the StakedUSDe contract, which has been adapted to inherit the ERC20MultiVotes contract.
-contract StakedUSDeVotingTest is Test {
+// the StakedPiku contract, which has been adapted to inherit the ERC20MultiVotes contract.
+contract StakedPikuVotingTest is Test {
 
-    StakedUSDeMock_Exposed stakedPiku;
-    USDe pikuToken;
+    StakedPikuMock_Exposed stakedPiku;
+    PIKU pikuToken;
     
     address constant delegate1 = address(0xDEAD);
     address constant delegate2 = address(0xBEEF);
@@ -23,10 +23,10 @@ contract StakedUSDeVotingTest is Test {
 
     function setUp() public {
         // Init test token and TEST contract as minter
-        pikuToken = new USDe(address(this));
+        pikuToken = new PIKU(address(this));
         pikuToken.setMinter(address(this));
 
-        stakedPiku = new StakedUSDeMock_Exposed(pikuToken, address(this), address(this));
+        stakedPiku = new StakedPikuMock_Exposed(pikuToken, address(this), address(this));
     }
 
     /*///////////////////////////////////////////////////////////////
@@ -276,7 +276,7 @@ contract StakedUSDeVotingTest is Test {
 
         uint256 block1 = block.number;
         assertEq(stakedPiku.numCheckpoints(delegate1), 1);
-        StakedUSDeMock_Exposed.Checkpoint memory checkpoint1 = stakedPiku.checkpoints(delegate1, 0);
+        StakedPikuMock_Exposed.Checkpoint memory checkpoint1 = stakedPiku.checkpoints(delegate1, 0);
         assertEq(checkpoint1.fromBlock, block1);
         assertEq(checkpoint1.votes, 4e18);
 
@@ -303,7 +303,7 @@ contract StakedUSDeVotingTest is Test {
         assertEq(checkpoint1.votes, 8e18);
 
         // new checkpoint 2
-        StakedUSDeMock_Exposed.Checkpoint memory checkpoint2 = stakedPiku.checkpoints(delegate1, 1);
+        StakedPikuMock_Exposed.Checkpoint memory checkpoint2 = stakedPiku.checkpoints(delegate1, 1);
         assertEq(checkpoint2.fromBlock, block2);
         assertEq(checkpoint2.votes, 6e18);
 
@@ -327,7 +327,7 @@ contract StakedUSDeVotingTest is Test {
         assertEq(checkpoint2.votes, 6e18);
 
         // new checkpoint 3
-        StakedUSDeMock_Exposed.Checkpoint memory checkpoint3 = stakedPiku.checkpoints(delegate1, 2);
+        StakedPikuMock_Exposed.Checkpoint memory checkpoint3 = stakedPiku.checkpoints(delegate1, 2);
         assertEq(checkpoint3.fromBlock, block3);
         assertEq(checkpoint3.votes, 10e18);
 

@@ -2,12 +2,12 @@
 pragma solidity 0.8.19;
 
 import "forge-std/Script.sol";
-import "contracts/stakedPiku/StakedUSDeV2.sol";
+import "contracts/stakedPiku/StakedPikuV2.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-// Mock USDe token for local testing
-contract MockUSDe is ERC20 {
-    constructor() ERC20("Mock USDe", "USDe") {
+// Mock PIKU token for local testing
+contract MockPiku is ERC20 {
+    constructor() ERC20("Mock PIKU", "PIKU") {
         _mint(msg.sender, 1000000 * 10**18); // Mint 1M tokens
     }
 }
@@ -20,20 +20,20 @@ contract LocalDeployment is Script {
         
         vm.startBroadcast(deployerPrivateKey);
         
-        // Deploy mock USDe token
-        MockUSDe mockUSDe = new MockUSDe();
-        console.log("Mock USDe deployed to:", address(mockUSDe));
+        // Deploy mock PIKU token
+        MockPiku mockPiku = new MockPiku();
+        console.log("Mock PIKU deployed to:", address(mockPiku));
         
-        // Deploy StakedUSDeV2
-        StakedUSDeV2 stakedUSDe = new StakedUSDeV2(
-            IERC20(address(mockUSDe)),
+        // Deploy StakedPikuV2
+        StakedPikuV2 stakedPiku = new StakedPikuV2(
+            IERC20(address(mockPiku)),
             deployer, // rewarder
             deployer  // owner
         );
-        console.log("StakedUSDeV2 deployed to:", address(stakedUSDe));
+        console.log("StakedPikuV2 deployed to:", address(stakedPiku));
         
-        // Approve staking contract to spend USDe
-        mockUSDe.approve(address(stakedUSDe), type(uint256).max);
+        // Approve staking contract to spend PIKU
+        mockPiku.approve(address(stakedPiku), type(uint256).max);
         
         vm.stopBroadcast();
     }

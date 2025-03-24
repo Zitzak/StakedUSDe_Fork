@@ -9,17 +9,17 @@ import {console} from "forge-std/console.sol";
 import "forge-std/Test.sol";
 import {SigUtils} from "forge-std/SigUtils.sol";
 
-import "contracts/token/USDe.sol";
-import "contracts/stakedPiku/StakedUSDe.sol";
-import "contracts/interfaces/IUSDe.sol";
+import "contracts/token/PIKU.sol";
+import "contracts/stakedPiku/StakedPiku.sol";
+import "contracts/interfaces/IPiku.sol";
 import "contracts/interfaces/IERC20Events.sol";
 import "contracts/interfaces/ISingleAdminAccessControl.sol";
 
-contract StakedUSDeBlacklistTest is Test, IERC20Events {
-  USDe public usdeToken;
-  StakedUSDe public stakedUSDe;
-  SigUtils public sigUtilsUSDe;
-  SigUtils public sigUtilsStakedUSDe;
+contract StakedPikuBlacklistTest is Test, IERC20Events {
+  PIKU public pikuToken;
+  StakedPiku public stakedPiku;
+  SigUtils public sigUtilsPiku;
+  SigUtils public sigUtilsStakedPiku;
   uint256 public _amount = 100 ether;
 
   address public owner;
@@ -39,17 +39,17 @@ contract StakedUSDeBlacklistTest is Test, IERC20Events {
   event LockedAmountRedistributed(address indexed from, address indexed to, uint256 amountToDistribute);
 
   function setUp() public virtual {
-    usdeToken = new USDe(address(this));
+    pikuToken = new PIKU(address(this));
 
     alice = makeAddr("alice");
     bob = makeAddr("bob");
     greg = makeAddr("greg");
     owner = makeAddr("owner");
 
-    usdeToken.setMinter(address(this));
+    pikuToken.setMinter(address(this));
 
     vm.startPrank(owner);
-    stakedUSDe = new StakedUSDe(IUSDe(address(usdeToken)), makeAddr('rewarder'), owner);
+    stakedPiku = new StakedPiku(IPiku(address(pikuToken)), makeAddr('rewarder'), owner);
     vm.stopPrank();
 
     FULL_RESTRICTED_STAKER_ROLE = keccak256("FULL_RESTRICTED_STAKER_ROLE");
@@ -59,20 +59,20 @@ contract StakedUSDeBlacklistTest is Test, IERC20Events {
   }
 
   function _mintApproveDeposit(address staker, uint256 amount, bool expectRevert) internal {
-    usdeToken.mint(staker, amount);
+    pikuToken.mint(staker, amount);
 
     vm.startPrank(staker);
-    usdeToken.approve(address(stakedUSDe), amount);
+    pikuToken.approve(address(stakedPiku), amount);
 
-    uint256 sharesBefore = stakedUSDe.balanceOf(staker);
+    uint256 sharesBefore = stakedPiku.balanceOf(staker);
     if (expectRevert) {
-      vm.expectRevert(IStakedUSDe.OperationNotAllowed.selector);
+      vm.expectRevert(IStakedPiku.OperationNotAllowed.selector);
     } else {
       vm.expectEmit(true, true, true, false);
       emit Deposit(staker, staker, amount, amount);
     }
-    stakedUSDe.deposit(amount, staker);
-    uint256 sharesAfter = stakedUSDe.balanceOf(staker);
+    stakedPiku.deposit(amount, staker);
+    uint256 sharesAfter = stakedPiku.balanceOf(staker);
     if (expectRevert) {
       assertEq(sharesAfter, sharesBefore);
     } else {
@@ -82,20 +82,20 @@ contract StakedUSDeBlacklistTest is Test, IERC20Events {
   }
 
   function _redeem(address staker, uint256 amount, bool expectRevert) internal {
-    uint256 balBefore = usdeToken.balanceOf(staker);
+    uint256 balBefore = pikuToken.balanceOf(staker);
 
     vm.startPrank(staker);
 
     if (expectRevert) {
-      vm.expectRevert(IStakedUSDe.OperationNotAllowed.selector);
+      vm.expectRevert(IStakedPiku.OperationNotAllowed.selector);
     } else {
       vm.expectEmit(true, true, true, false);
       emit Withdraw(staker, staker, staker, amount, amount);
     }
-    stakedUSDe.redeem(amount, staker, staker);
+    stakedPiku.redeem(amount, staker, staker);
     vm.stopPrank();
 
-    uint256 balAfter = usdeToken.balanceOf(staker);
+    uint256 balAfter = pikuToken.balanceOf(staker);
 
     if (expectRevert) {
       assertEq(balBefore, balAfter);
@@ -107,15 +107,15 @@ contract StakedUSDeBlacklistTest is Test, IERC20Events {
   function testStakeFlowCommonUser() public {
     _mintApproveDeposit(greg, _amount, false);
 
-    assertEq(usdeToken.balanceOf(greg), 0);
-    assertEq(usdeToken.balanceOf(address(stakedUSDe)), _amount);
-    assertEq(stakedUSDe.balanceOf(greg), _amount);
+    assertEq(pikuToken.balanceOf(greg), 0);
+    assertEq(pikuToken.balanceOf(address(stakedPiku)), _amount);
+    assertEq(stakedPiku.balanceOf(greg), _amount);
 
     _redeem(greg, _amount, false);
 
-    assertEq(usdeToken.balanceOf(greg), _amount);
-    assertEq(usdeToken.balanceOf(address(stakedUSDe)), 0);
-    assertEq(stakedUSDe.balanceOf(greg), 0);
+    assertEq(pikuToken.balanceOf(greg), _amount);
+    assertEq(pikuToken.balanceOf(address(stakedPiku)), 0);
+    assertEq(stakedPiku.balanceOf(greg), 0);
   }
 
   /**
@@ -124,7 +124,7 @@ contract StakedUSDeBlacklistTest is Test, IERC20Events {
   function test_softBlacklist_deposit_reverts() public {
     // Alice soft blacklisted
     vm.startPrank(owner);
-    stakedUSDe.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
     vm.stopPrank();
 
     _mintApproveDeposit(alice, _amount, true);
@@ -135,7 +135,7 @@ contract StakedUSDeBlacklistTest is Test, IERC20Events {
 
     // Alice soft blacklisted
     vm.startPrank(owner);
-    stakedUSDe.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
     vm.stopPrank();
 
     _redeem(alice, _amount, false);
@@ -146,11 +146,11 @@ contract StakedUSDeBlacklistTest is Test, IERC20Events {
 
     // Alice soft blacklisted
     vm.startPrank(owner);
-    stakedUSDe.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
     vm.stopPrank();
 
     vm.prank(alice);
-    stakedUSDe.transfer(bob, _amount);
+    stakedPiku.transfer(bob, _amount);
   }
 
   function test_softBlacklist_transferFrom_pass() public {
@@ -158,14 +158,14 @@ contract StakedUSDeBlacklistTest is Test, IERC20Events {
 
     // Alice soft blacklisted
     vm.startPrank(owner);
-    stakedUSDe.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
     vm.stopPrank();
 
     vm.prank(alice);
-    stakedUSDe.approve(bob, _amount);
+    stakedPiku.approve(bob, _amount);
 
     vm.prank(bob);
-    stakedUSDe.transferFrom(alice, bob, _amount);
+    stakedPiku.transferFrom(alice, bob, _amount);
   }
 
   /**
@@ -175,7 +175,7 @@ contract StakedUSDeBlacklistTest is Test, IERC20Events {
   function test_fullBlacklist_deposit_reverts() public {
     // Alice full blacklisted
     vm.startPrank(owner);
-    stakedUSDe.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
     vm.stopPrank();
 
     _mintApproveDeposit(alice, _amount, true);
@@ -186,7 +186,7 @@ contract StakedUSDeBlacklistTest is Test, IERC20Events {
 
     // Alice soft blacklisted
     vm.startPrank(owner);
-    stakedUSDe.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
     vm.stopPrank();
 
     _redeem(alice, _amount, true);
@@ -197,12 +197,12 @@ contract StakedUSDeBlacklistTest is Test, IERC20Events {
 
     // Alice soft blacklisted
     vm.startPrank(owner);
-    stakedUSDe.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
     vm.stopPrank();
 
-    vm.expectRevert(IStakedUSDe.OperationNotAllowed.selector);
+    vm.expectRevert(IStakedPiku.OperationNotAllowed.selector);
     vm.prank(alice);
-    stakedUSDe.transfer(bob, _amount);
+    stakedPiku.transfer(bob, _amount);
   }
 
   function test_fullBlacklist_transferFrom_pass() public {
@@ -210,16 +210,16 @@ contract StakedUSDeBlacklistTest is Test, IERC20Events {
 
     // Alice soft blacklisted
     vm.startPrank(owner);
-    stakedUSDe.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
     vm.stopPrank();
 
     vm.prank(alice);
-    stakedUSDe.approve(bob, _amount);
+    stakedPiku.approve(bob, _amount);
 
     vm.prank(bob);
 
-    vm.expectRevert(IStakedUSDe.OperationNotAllowed.selector);
-    stakedUSDe.transferFrom(alice, bob, _amount);
+    vm.expectRevert(IStakedPiku.OperationNotAllowed.selector);
+    stakedPiku.transferFrom(alice, bob, _amount);
   }
 
   function test_fullBlacklist_can_not_be_transfer_recipient() public {
@@ -228,12 +228,12 @@ contract StakedUSDeBlacklistTest is Test, IERC20Events {
 
     // Alice full blacklisted
     vm.startPrank(owner);
-    stakedUSDe.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
     vm.stopPrank();
 
-    vm.expectRevert(IStakedUSDe.OperationNotAllowed.selector);
+    vm.expectRevert(IStakedPiku.OperationNotAllowed.selector);
     vm.prank(bob);
-    stakedUSDe.transfer(alice, _amount);
+    stakedPiku.transfer(alice, _amount);
   }
 
   function test_fullBlacklist_user_can_not_burn_and_donate_to_vault() public {
@@ -241,12 +241,12 @@ contract StakedUSDeBlacklistTest is Test, IERC20Events {
 
     // Alice full blacklisted
     vm.startPrank(owner);
-    stakedUSDe.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
     vm.stopPrank();
 
     vm.expectRevert(bytes("ERC20: transfer to the zero address"));
     vm.prank(alice);
-    stakedUSDe.transfer(address(0), _amount);
+    stakedPiku.transfer(address(0), _amount);
   }
 
   /**
@@ -255,14 +255,14 @@ contract StakedUSDeBlacklistTest is Test, IERC20Events {
   function test_softFullBlacklist_deposit_reverts() public {
     // Alice soft blacklisted
     vm.startPrank(owner);
-    stakedUSDe.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
     vm.stopPrank();
 
     _mintApproveDeposit(alice, _amount, true);
 
     // Alice full blacklisted
     vm.startPrank(owner);
-    stakedUSDe.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
     vm.stopPrank();
     _mintApproveDeposit(alice, _amount, true);
   }
@@ -272,14 +272,14 @@ contract StakedUSDeBlacklistTest is Test, IERC20Events {
 
     // Alice soft blacklisted
     vm.startPrank(owner);
-    stakedUSDe.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
     vm.stopPrank();
 
     _redeem(alice, _amount / 3, false);
 
     // Alice full blacklisted
     vm.startPrank(owner);
-    stakedUSDe.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
     vm.stopPrank();
 
     _redeem(alice, _amount / 3, true);
@@ -290,20 +290,20 @@ contract StakedUSDeBlacklistTest is Test, IERC20Events {
 
     // Alice soft blacklisted can transfer
     vm.startPrank(owner);
-    stakedUSDe.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
     vm.stopPrank();
 
     vm.prank(alice);
-    stakedUSDe.transfer(bob, _amount / 3);
+    stakedPiku.transfer(bob, _amount / 3);
 
     // Alice full blacklisted cannot transfer
     vm.startPrank(owner);
-    stakedUSDe.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
     vm.stopPrank();
 
-    vm.expectRevert(IStakedUSDe.OperationNotAllowed.selector);
+    vm.expectRevert(IStakedPiku.OperationNotAllowed.selector);
     vm.prank(alice);
-    stakedUSDe.transfer(bob, _amount / 3);
+    stakedPiku.transfer(bob, _amount / 3);
   }
 
   /**
@@ -312,42 +312,42 @@ contract StakedUSDeBlacklistTest is Test, IERC20Events {
 
   function test_redistributeLockedAmount() public {
     _mintApproveDeposit(alice, _amount, false);
-    uint256 aliceStakedBalance = stakedUSDe.balanceOf(alice);
-    uint256 previousTotalSupply = stakedUSDe.totalSupply();
+    uint256 aliceStakedBalance = stakedPiku.balanceOf(alice);
+    uint256 previousTotalSupply = stakedPiku.totalSupply();
     assertEq(aliceStakedBalance, _amount);
 
     vm.startPrank(owner);
 
-    stakedUSDe.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
 
     vm.expectEmit(true, true, true, true);
     emit LockedAmountRedistributed(alice, bob, _amount);
 
-    stakedUSDe.redistributeLockedAmount(alice, bob);
+    stakedPiku.redistributeLockedAmount(alice, bob);
 
     vm.stopPrank();
 
-    assertEq(stakedUSDe.balanceOf(alice), 0);
-    assertEq(stakedUSDe.balanceOf(bob), _amount);
-    assertEq(stakedUSDe.totalSupply(), previousTotalSupply);
+    assertEq(stakedPiku.balanceOf(alice), 0);
+    assertEq(stakedPiku.balanceOf(bob), _amount);
+    assertEq(stakedPiku.totalSupply(), previousTotalSupply);
   }
 
   function testCanBurnOnRedistribute() public {
     _mintApproveDeposit(alice, _amount, false);
-    uint256 aliceStakedBalance = stakedUSDe.balanceOf(alice);
-    uint256 previousTotalSupply = stakedUSDe.totalSupply();
+    uint256 aliceStakedBalance = stakedPiku.balanceOf(alice);
+    uint256 previousTotalSupply = stakedPiku.totalSupply();
     assertEq(aliceStakedBalance, _amount);
 
     vm.startPrank(owner);
 
-    stakedUSDe.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
 
-    stakedUSDe.redistributeLockedAmount(alice, address(0));
+    stakedPiku.redistributeLockedAmount(alice, address(0));
 
     vm.stopPrank();
 
-    assertEq(stakedUSDe.balanceOf(alice), 0);
-    assertEq(stakedUSDe.totalSupply(), previousTotalSupply - _amount);
+    assertEq(stakedPiku.balanceOf(alice), 0);
+    assertEq(stakedPiku.totalSupply(), previousTotalSupply - _amount);
   }
 
   /**
@@ -356,43 +356,43 @@ contract StakedUSDeBlacklistTest is Test, IERC20Events {
   function test_renounce_reverts() public {
     vm.startPrank(owner);
 
-    stakedUSDe.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
-    stakedUSDe.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
 
     vm.stopPrank();
 
     vm.expectRevert();
-    stakedUSDe.renounceRole(FULL_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.renounceRole(FULL_RESTRICTED_STAKER_ROLE, alice);
     vm.expectRevert();
-    stakedUSDe.renounceRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.renounceRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
   }
 
   function test_grant_role() public {
     vm.startPrank(owner);
 
-    stakedUSDe.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
-    stakedUSDe.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
 
     vm.stopPrank();
 
-    assertEq(stakedUSDe.hasRole(FULL_RESTRICTED_STAKER_ROLE, alice), true);
-    assertEq(stakedUSDe.hasRole(SOFT_RESTRICTED_STAKER_ROLE, alice), true);
+    assertEq(stakedPiku.hasRole(FULL_RESTRICTED_STAKER_ROLE, alice), true);
+    assertEq(stakedPiku.hasRole(SOFT_RESTRICTED_STAKER_ROLE, alice), true);
   }
 
   function test_revoke_role() public {
     vm.startPrank(owner);
 
-    stakedUSDe.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
-    stakedUSDe.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
 
-    assertEq(stakedUSDe.hasRole(FULL_RESTRICTED_STAKER_ROLE, alice), true);
-    assertEq(stakedUSDe.hasRole(SOFT_RESTRICTED_STAKER_ROLE, alice), true);
+    assertEq(stakedPiku.hasRole(FULL_RESTRICTED_STAKER_ROLE, alice), true);
+    assertEq(stakedPiku.hasRole(SOFT_RESTRICTED_STAKER_ROLE, alice), true);
 
-    stakedUSDe.revokeRole(FULL_RESTRICTED_STAKER_ROLE, alice);
-    stakedUSDe.revokeRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.revokeRole(FULL_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.revokeRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
 
-    assertEq(stakedUSDe.hasRole(FULL_RESTRICTED_STAKER_ROLE, alice), false);
-    assertEq(stakedUSDe.hasRole(SOFT_RESTRICTED_STAKER_ROLE, alice), false);
+    assertEq(stakedPiku.hasRole(FULL_RESTRICTED_STAKER_ROLE, alice), false);
+    assertEq(stakedPiku.hasRole(SOFT_RESTRICTED_STAKER_ROLE, alice), false);
 
     vm.stopPrank();
   }
@@ -400,155 +400,155 @@ contract StakedUSDeBlacklistTest is Test, IERC20Events {
   function test_revoke_role_by_other_reverts() public {
     vm.startPrank(owner);
 
-    stakedUSDe.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
-    stakedUSDe.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
 
     vm.stopPrank();
 
     vm.startPrank(bob);
 
     vm.expectRevert();
-    stakedUSDe.revokeRole(FULL_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.revokeRole(FULL_RESTRICTED_STAKER_ROLE, alice);
     vm.expectRevert();
-    stakedUSDe.revokeRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.revokeRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
 
     vm.stopPrank();
 
-    assertEq(stakedUSDe.hasRole(FULL_RESTRICTED_STAKER_ROLE, alice), true);
-    assertEq(stakedUSDe.hasRole(SOFT_RESTRICTED_STAKER_ROLE, alice), true);
+    assertEq(stakedPiku.hasRole(FULL_RESTRICTED_STAKER_ROLE, alice), true);
+    assertEq(stakedPiku.hasRole(SOFT_RESTRICTED_STAKER_ROLE, alice), true);
   }
 
   function test_revoke_role_by_myself_reverts() public {
     vm.startPrank(owner);
 
-    stakedUSDe.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
-    stakedUSDe.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(FULL_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.grantRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
 
     vm.stopPrank();
 
     vm.startPrank(alice);
 
     vm.expectRevert();
-    stakedUSDe.revokeRole(FULL_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.revokeRole(FULL_RESTRICTED_STAKER_ROLE, alice);
     vm.expectRevert();
-    stakedUSDe.revokeRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
+    stakedPiku.revokeRole(SOFT_RESTRICTED_STAKER_ROLE, alice);
 
     vm.stopPrank();
 
-    assertEq(stakedUSDe.hasRole(FULL_RESTRICTED_STAKER_ROLE, alice), true);
-    assertEq(stakedUSDe.hasRole(SOFT_RESTRICTED_STAKER_ROLE, alice), true);
+    assertEq(stakedPiku.hasRole(FULL_RESTRICTED_STAKER_ROLE, alice), true);
+    assertEq(stakedPiku.hasRole(SOFT_RESTRICTED_STAKER_ROLE, alice), true);
   }
 
   function testAdminCannotRenounce() public {
     vm.startPrank(owner);
 
-    vm.expectRevert(IStakedUSDe.OperationNotAllowed.selector);
-    stakedUSDe.renounceRole(DEFAULT_ADMIN_ROLE, owner);
+    vm.expectRevert(IStakedPiku.OperationNotAllowed.selector);
+    stakedPiku.renounceRole(DEFAULT_ADMIN_ROLE, owner);
 
     vm.expectRevert(ISingleAdminAccessControl.InvalidAdminChange.selector);
-    stakedUSDe.revokeRole(DEFAULT_ADMIN_ROLE, owner);
+    stakedPiku.revokeRole(DEFAULT_ADMIN_ROLE, owner);
 
     vm.stopPrank();
 
-    assertTrue(stakedUSDe.hasRole(DEFAULT_ADMIN_ROLE, owner));
-    assertEq(stakedUSDe.owner(), owner);
+    assertTrue(stakedPiku.hasRole(DEFAULT_ADMIN_ROLE, owner));
+    assertEq(stakedPiku.owner(), owner);
   }
 
   function testBlacklistManagerCanBlacklist() public {
     vm.prank(owner);
-    stakedUSDe.grantRole(BLACKLIST_MANAGER_ROLE, alice);
-    assertTrue(stakedUSDe.hasRole(BLACKLIST_MANAGER_ROLE, alice));
-    assertFalse(stakedUSDe.hasRole(DEFAULT_ADMIN_ROLE, alice));
+    stakedPiku.grantRole(BLACKLIST_MANAGER_ROLE, alice);
+    assertTrue(stakedPiku.hasRole(BLACKLIST_MANAGER_ROLE, alice));
+    assertFalse(stakedPiku.hasRole(DEFAULT_ADMIN_ROLE, alice));
 
     vm.startPrank(alice);
-    stakedUSDe.addToBlacklist(bob, true);
-    assertTrue(stakedUSDe.hasRole(FULL_RESTRICTED_STAKER_ROLE, bob));
+    stakedPiku.addToBlacklist(bob, true);
+    assertTrue(stakedPiku.hasRole(FULL_RESTRICTED_STAKER_ROLE, bob));
 
-    stakedUSDe.addToBlacklist(bob, false);
-    assertTrue(stakedUSDe.hasRole(SOFT_RESTRICTED_STAKER_ROLE, bob));
+    stakedPiku.addToBlacklist(bob, false);
+    assertTrue(stakedPiku.hasRole(SOFT_RESTRICTED_STAKER_ROLE, bob));
     vm.stopPrank();
   }
 
   function testBlacklistManagerCannotRedistribute() public {
     vm.prank(owner);
-    stakedUSDe.grantRole(BLACKLIST_MANAGER_ROLE, alice);
-    assertTrue(stakedUSDe.hasRole(BLACKLIST_MANAGER_ROLE, alice));
-    assertFalse(stakedUSDe.hasRole(DEFAULT_ADMIN_ROLE, alice));
+    stakedPiku.grantRole(BLACKLIST_MANAGER_ROLE, alice);
+    assertTrue(stakedPiku.hasRole(BLACKLIST_MANAGER_ROLE, alice));
+    assertFalse(stakedPiku.hasRole(DEFAULT_ADMIN_ROLE, alice));
 
     _mintApproveDeposit(bob, 1000 ether, false);
-    assertEq(stakedUSDe.balanceOf(bob), 1000 ether);
+    assertEq(stakedPiku.balanceOf(bob), 1000 ether);
 
     vm.startPrank(alice);
-    stakedUSDe.addToBlacklist(bob, true);
-    assertTrue(stakedUSDe.hasRole(FULL_RESTRICTED_STAKER_ROLE, bob));
+    stakedPiku.addToBlacklist(bob, true);
+    assertTrue(stakedPiku.hasRole(FULL_RESTRICTED_STAKER_ROLE, bob));
     vm.expectRevert(
       "AccessControl: account 0x328809bc894f92807417d2dad6b7c998c1afdac6 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
     );
-    stakedUSDe.redistributeLockedAmount(bob, alice);
-    assertEq(stakedUSDe.balanceOf(bob), 1000 ether);
+    stakedPiku.redistributeLockedAmount(bob, alice);
+    assertEq(stakedPiku.balanceOf(bob), 1000 ether);
     vm.stopPrank();
   }
 
   function testBlackListManagerCannotAddOthers() public {
     vm.prank(owner);
-    stakedUSDe.grantRole(BLACKLIST_MANAGER_ROLE, alice);
-    assertTrue(stakedUSDe.hasRole(BLACKLIST_MANAGER_ROLE, alice));
-    assertFalse(stakedUSDe.hasRole(DEFAULT_ADMIN_ROLE, alice));
+    stakedPiku.grantRole(BLACKLIST_MANAGER_ROLE, alice);
+    assertTrue(stakedPiku.hasRole(BLACKLIST_MANAGER_ROLE, alice));
+    assertFalse(stakedPiku.hasRole(DEFAULT_ADMIN_ROLE, alice));
 
     vm.prank(alice);
     vm.expectRevert(
       "AccessControl: account 0x328809bc894f92807417d2dad6b7c998c1afdac6 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
     );
-    stakedUSDe.grantRole(BLACKLIST_MANAGER_ROLE, bob);
+    stakedPiku.grantRole(BLACKLIST_MANAGER_ROLE, bob);
   }
 
   function testBlacklistManagerCanUnblacklist() public {
     vm.prank(owner);
-    stakedUSDe.grantRole(BLACKLIST_MANAGER_ROLE, alice);
-    assertTrue(stakedUSDe.hasRole(BLACKLIST_MANAGER_ROLE, alice));
-    assertFalse(stakedUSDe.hasRole(DEFAULT_ADMIN_ROLE, alice));
+    stakedPiku.grantRole(BLACKLIST_MANAGER_ROLE, alice);
+    assertTrue(stakedPiku.hasRole(BLACKLIST_MANAGER_ROLE, alice));
+    assertFalse(stakedPiku.hasRole(DEFAULT_ADMIN_ROLE, alice));
 
     vm.startPrank(alice);
-    stakedUSDe.addToBlacklist(bob, true);
-    assertTrue(stakedUSDe.hasRole(FULL_RESTRICTED_STAKER_ROLE, bob));
+    stakedPiku.addToBlacklist(bob, true);
+    assertTrue(stakedPiku.hasRole(FULL_RESTRICTED_STAKER_ROLE, bob));
 
-    stakedUSDe.addToBlacklist(bob, false);
-    assertTrue(stakedUSDe.hasRole(SOFT_RESTRICTED_STAKER_ROLE, bob));
+    stakedPiku.addToBlacklist(bob, false);
+    assertTrue(stakedPiku.hasRole(SOFT_RESTRICTED_STAKER_ROLE, bob));
 
-    stakedUSDe.removeFromBlacklist(bob, true);
-    assertFalse(stakedUSDe.hasRole(FULL_RESTRICTED_STAKER_ROLE, bob));
+    stakedPiku.removeFromBlacklist(bob, true);
+    assertFalse(stakedPiku.hasRole(FULL_RESTRICTED_STAKER_ROLE, bob));
 
-    stakedUSDe.removeFromBlacklist(bob, false);
-    assertFalse(stakedUSDe.hasRole(SOFT_RESTRICTED_STAKER_ROLE, bob));
+    stakedPiku.removeFromBlacklist(bob, false);
+    assertFalse(stakedPiku.hasRole(SOFT_RESTRICTED_STAKER_ROLE, bob));
     vm.stopPrank();
   }
 
   function testBlacklistManagerCanNotBlacklistAdmin() public {
     vm.prank(owner);
-    stakedUSDe.grantRole(BLACKLIST_MANAGER_ROLE, alice);
-    assertTrue(stakedUSDe.hasRole(BLACKLIST_MANAGER_ROLE, alice));
-    assertFalse(stakedUSDe.hasRole(DEFAULT_ADMIN_ROLE, alice));
+    stakedPiku.grantRole(BLACKLIST_MANAGER_ROLE, alice);
+    assertTrue(stakedPiku.hasRole(BLACKLIST_MANAGER_ROLE, alice));
+    assertFalse(stakedPiku.hasRole(DEFAULT_ADMIN_ROLE, alice));
 
     vm.startPrank(alice);
-    vm.expectRevert(IStakedUSDe.CantBlacklistOwner.selector);
-    stakedUSDe.addToBlacklist(owner, true);
-    vm.expectRevert(IStakedUSDe.CantBlacklistOwner.selector);
-    stakedUSDe.addToBlacklist(owner, false);
+    vm.expectRevert(IStakedPiku.CantBlacklistOwner.selector);
+    stakedPiku.addToBlacklist(owner, true);
+    vm.expectRevert(IStakedPiku.CantBlacklistOwner.selector);
+    stakedPiku.addToBlacklist(owner, false);
     vm.stopPrank();
 
-    assertFalse(stakedUSDe.hasRole(FULL_RESTRICTED_STAKER_ROLE, owner));
-    assertFalse(stakedUSDe.hasRole(SOFT_RESTRICTED_STAKER_ROLE, owner));
+    assertFalse(stakedPiku.hasRole(FULL_RESTRICTED_STAKER_ROLE, owner));
+    assertFalse(stakedPiku.hasRole(SOFT_RESTRICTED_STAKER_ROLE, owner));
   }
 
   function testOwnerCanRemoveBlacklistManager() public {
     vm.startPrank(owner);
-    stakedUSDe.grantRole(BLACKLIST_MANAGER_ROLE, alice);
-    assertTrue(stakedUSDe.hasRole(BLACKLIST_MANAGER_ROLE, alice));
-    assertFalse(stakedUSDe.hasRole(DEFAULT_ADMIN_ROLE, alice));
+    stakedPiku.grantRole(BLACKLIST_MANAGER_ROLE, alice);
+    assertTrue(stakedPiku.hasRole(BLACKLIST_MANAGER_ROLE, alice));
+    assertFalse(stakedPiku.hasRole(DEFAULT_ADMIN_ROLE, alice));
 
-    stakedUSDe.revokeRole(BLACKLIST_MANAGER_ROLE, alice);
+    stakedPiku.revokeRole(BLACKLIST_MANAGER_ROLE, alice);
     vm.stopPrank();
 
-    assertFalse(stakedUSDe.hasRole(BLACKLIST_MANAGER_ROLE, alice));
+    assertFalse(stakedPiku.hasRole(BLACKLIST_MANAGER_ROLE, alice));
   }
 }

@@ -2,14 +2,14 @@
 
 pragma solidity 0.8.19;
 
-import "./IStakedUSDe.sol";
+import "./IStakedPiku.sol";
 
 struct UserCooldown {
   uint104 cooldownEnd;
   uint256 underlyingAmount;
 }
 
-interface IStakedUSDeCooldown is IStakedUSDe {
+interface IStakedPikuCooldown is IStakedPiku {
   // Events //
   /// @notice Event emitted when cooldown duration updates
   event CooldownDurationUpdated(uint24 previousDuration, uint24 newDuration);

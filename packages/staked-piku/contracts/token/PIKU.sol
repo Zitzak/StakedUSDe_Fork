@@ -5,17 +5,17 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
-import "contracts/interfaces/IUSDeDefinitions.sol";
+import "contracts/interfaces/IPikuDefinitions.sol";
 
 /**
- * @title USDe
+ * @title PIKU
  * @notice Stable Coin Contract
  * @dev Only a single approved minter can mint new tokens
  */
-contract USDe is Ownable2Step, ERC20Burnable, ERC20Permit, IUSDeDefinitions {
+contract PIKU is Ownable2Step, ERC20Burnable, ERC20Permit, IPikuDefinitions {
   address public minter;
 
-  constructor(address admin) ERC20("USDe", "USDe") ERC20Permit("USDe") {
+  constructor(address admin) ERC20("PIKU", "PIKU") ERC20Permit("PIKU") {
     if (admin == address(0)) revert ZeroAddressException();
     _transferOwnership(admin);
   }

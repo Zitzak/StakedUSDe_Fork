@@ -36,5 +36,5 @@ forge script script/StakeDeployment.sol:StakeDeployment --rpc-url sepolia --broa
 
 ## Deployed Contracts (Sepolia)
 
-- USDe Token: `0xc0192bC852fb7d5fBc9aCF6256afabA606E66607`
-- StakedUSDeV2: `0x6df01b418abd71c2510cef6a2298d8e47b88e7c5`
+- PIKU Token: `0xc0192bC852fb7d5fBc9aCF6256afabA606E66607`
+- StakedPikuV2: `0x6df01b418abd71c2510cef6a2298d8e47b88e7c5`

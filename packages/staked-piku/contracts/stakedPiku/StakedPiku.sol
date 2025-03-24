@@ -10,15 +10,15 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "contracts/multiVotes/ERC20MultiVotes.sol";
 import "contracts/stakedPiku/SingleAdminAccessControl.sol";
-import "contracts/interfaces/IStakedUSDe.sol";
+import "contracts/interfaces/IStakedPiku.sol";
 
 /**
- * @title StakedUSDe
- * @notice The StakedUSDe contract allows users to stake USDe tokens and earn a portion of protocol LST and perpetual yield that is allocated
+ * @title StakedPiku
+ * @notice The StakedPiku contract allows users to stake PIKU tokens and earn a portion of protocol LST and perpetual yield that is allocated
  * to stakers by the Ethena DAO governance voted yield distribution algorithm.  The algorithm seeks to balance the stability of the protocol by funding
  * the protocol's insurance fund, DAO activities, and rewarding stakers with a portion of the protocol's yield.
  */
-contract StakedUSDe is SingleAdminAccessControl, ReentrancyGuard, ERC20MultiVotes, ERC4626, IStakedUSDe {
+contract StakedPiku is SingleAdminAccessControl, ReentrancyGuard, ERC20MultiVotes, ERC4626, IStakedPiku {
   using SafeERC20 for IERC20;
 
   /* ------------- CONSTANTS ------------- */
@@ -61,16 +61,16 @@ contract StakedUSDe is SingleAdminAccessControl, ReentrancyGuard, ERC20MultiVote
   /* ------------- CONSTRUCTOR ------------- */
 
   /**
-   * @notice Constructor for StakedUSDe contract.
-   * @param _asset The address of the USDe token.
+   * @notice Constructor for StakedPiku contract.
+   * @param _asset The address of the PIKU token.
    * @param _initialRewarder The address of the initial rewarder.
    * @param _owner The address of the admin role.
    *
    */
   constructor(IERC20 _asset, address _initialRewarder, address _owner)
-    ERC20("Staked USDe", "stUSDe")
+    ERC20("Staked PIKU", "sPIKU")
     ERC4626(_asset)
-    ERC20Permit("stUSDe")
+    ERC20Permit("sPIKU")
   {
     if (_owner == address(0) || _initialRewarder == address(0) || address(_asset) == address(0)) {
       revert InvalidZeroAddress();
@@ -128,8 +128,8 @@ contract StakedUSDe is SingleAdminAccessControl, ReentrancyGuard, ERC20MultiVote
 
   /**
    * @notice Allows the owner to rescue tokens accidentally sent to the contract.
-   * Note that the owner cannot rescue USDe tokens because they functionally sit here
-   * and belong to stakers but can rescue staked USDe as they should never actually
+   * Note that the owner cannot rescue PIKU tokens because they functionally sit here
+   * and belong to stakers but can rescue staked PIKU as they should never actually
    * sit in this contract and a staker may well transfer them here by accident.
    * @param token The token to be rescued.
    * @param amount The amount of tokens to be rescued.
@@ -161,14 +161,14 @@ contract StakedUSDe is SingleAdminAccessControl, ReentrancyGuard, ERC20MultiVote
   /* ------------- PUBLIC ------------- */
 
   /**
-   * @notice Returns the amount of USDe tokens that are vested in the contract.
+   * @notice Returns the amount of PIKU tokens that are vested in the contract.
    */
   function totalAssets() public view override returns (uint256) {
     return IERC20(asset()).balanceOf(address(this)) - getUnvestedAmount();
   }
 
   /**
-   * @notice Returns the amount of USDe tokens that are unvested in the contract.
+   * @notice Returns the amount of PIKU tokens that are unvested in the contract.
    */
   function getUnvestedAmount() public view returns (uint256) {
     uint256 timeSinceLastDistribution = block.timestamp - lastDistributionTimestamp;

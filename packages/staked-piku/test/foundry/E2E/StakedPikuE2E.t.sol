@@ -5,14 +5,14 @@
 
 // import {Test} from "forge-std/Test.sol";
 
-// import {StakedUSDeV2} from "../../../contracts/StakedUSDeV2.sol";
-// import {USDe} from "../../../contracts/USDe.sol";
+// import {StakedPikuV2} from "../../../contracts/StakedPikuV2.sol";
+// import {PIKU} from "../../../contracts/PIKU.sol";
 
 
 
 // contract StakedPikuE2E is Test {
-//     StakedUSDeV2 stakedPiku;
-//     USDe pikuToken;
+//     StakedPikuV2 stakedPiku;
+//     PIKU pikuToken;
 
 //     address constant PIKU_ADMIN = makeAddr("PIKU_ADMIN");
 //     address constant REWARDER = makeAddr("REWARDER");
@@ -26,12 +26,12 @@
 
 //     function setUp() public {
 //         // Init piku token
-//         pikuToken = new USDe(address(this));
+//         pikuToken = new PIKU(address(this));
 
 //         pikuToken.setMinter(address(this));
 
 //         // Init staked piku
-//         stakedPiku = new StakedUSDeV2(pikuToken, REWARDER, PIKU_ADMIN);
+//         stakedPiku = new StakedPikuV2(pikuToken, REWARDER, PIKU_ADMIN);
 //     }
 
 //     function lifecycle() public {}

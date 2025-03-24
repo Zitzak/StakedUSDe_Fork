@@ -2,17 +2,17 @@
 
 pragma solidity 0.8.19;
 
-interface IStakedUSDe {
+interface IStakedPiku {
   // Events //
   /// @notice Event emitted when the rewards are received
-  event RewardsReceived(uint256 indexed amount, uint256 newVestingUSDeAmount);
+  event RewardsReceived(uint256 indexed amount, uint256 newVestingPikuAmount);
   /// @notice Event emitted when the balance from an FULL_RESTRICTED_STAKER_ROLE user are redistributed
   event LockedAmountRedistributed(address indexed from, address indexed to, uint256 amount);
 
   // Errors //
   /// @notice Error emitted shares or assets equal zero.
   error InvalidAmount();
-  /// @notice Error emitted when owner attempts to rescue USDe tokens.
+  /// @notice Error emitted when owner attempts to rescue PIKU tokens.
   error InvalidToken();
   /// @notice Error emitted when slippage is exceeded on a deposit or withdrawal
   error SlippageExceeded();
