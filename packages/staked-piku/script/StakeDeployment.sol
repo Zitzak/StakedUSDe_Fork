@@ -7,9 +7,10 @@ import 'contracts/token/PIKU.sol';
 import '@openzeppelin/contracts/interfaces/IERC20.sol';
 
 contract StakeDeployment is Script {
-    // update accordingly - this will be the admin/owner of both contracts
-    address public owner = address(0x2eAA473e2Efb22ba86E76352c19Ec9666984D10C);
-    address public rewarder = address(0x2eAA473e2Efb22ba86E76352c19Ec9666984D10C);
+    // update accordingly in the .env file
+    address public ownerPikuToken = vm.envAddress('PIKU_OWNER_ADDRESS');
+    address public ownerStakedPiku = vm.envAddress('STAKED_PIKU_OWNER_ADDRESS');
+    address public rewarder = vm.envAddress('REWARDER_ADDRESS');
 
     function run() public virtual {
         uint256 ownerPrivateKey = uint256(vm.envBytes32('PRIVATE_KEY'));

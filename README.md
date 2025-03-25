@@ -41,6 +41,11 @@ Configure the following environment variables in both .env files:
 - `PRIVATE_KEY`: Your wallet's private key for deployment
 - `ETHERSCAN_API_KEY`: Your Etherscan API key for contract verification
 
+Configure the additional variables for the staked-piku .env files
+- `PIKU_OWNER_ADDRESS`: Address of the owner of the PIKU contract
+- `STAKED_PIKU_OWNER_ADDRESS`: Address of the owner of the StakedPiku contract
+- `REWARDER_ADDRESS`: Address of the rewarder for the StakedPiku contract
+
 4. Install Foundry (required for staked-piku package):
 ```bash
 curl -L https://foundry.paradigm.xyz | bash
