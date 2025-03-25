@@ -1,7 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": [
-    ".env"
   ],
   "tasks": {
     "build": {
@@ -20,7 +19,9 @@
       ],
       "outputs": []
     },
-    "deploy": {
+    "deploy:staked-piku": {
+      "inputs": [".env"],
+      "env": ["PRIVATE_KEY", "SEPOLIA_RPC_URL", "ETHERSCAN_API_KEY"],
       "dependsOn": [
         "build",
         "test"
@@ -29,13 +30,32 @@
         "deployments/**"
       ]
     },
+    "deploy:merkle-drop": {
+      "inputs": [".env"],
+      "env": ["PRIVATE_KEY", "SEPOLIA_RPC_URL", "ETHERSCAN_API_KEY"],
+      "dependsOn": [
+        "build",
+        "test"
+      ]
+    },
+    "deploy:merkle-drop:withTransferOwner": {
+      "inputs": [".env"],
+      "env": ["PRIVATE_KEY", "MAINNET_RPC_URL", "ETHERSCAN_API_KEY"],
+      "dependsOn": [
+        "build",
+        "test"
+      ]
+    },
+    "clean": {
+    },
     "generate-abis": {
       "dependsOn": [
         "build"
       ],
       "outputs": [
         "packages/shared-abi/abis/**"
-      ]
+      ],
+      "cache": false
     }
   }
 }

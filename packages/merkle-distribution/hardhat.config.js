@@ -28,6 +28,31 @@ task('deploy:qr', 'Deploys contracts with custom parameters')
             merkleHeight: taskArgs.h,
         });
     });
+task('deploy:merkle-drop:withTransferOwner', 'Deploys contracts and transfers ownership')
+    .addParam('o', 'New owner')
+    .addParam('t', 'Token address')
+    .setAction(async (taskArgs, hre) => {
+        const deploymentScript = require('./deploy/deploy_cumulativeWithTransferOwner.js');
+        const { deployments, getNamedAccounts } = hre;
+        await deploymentScript({
+            deployments,
+            getNamedAccounts,
+            newOwner: taskArgs.o,
+            tokenAddress: taskArgs.t,
+        });
+    });
+
+task('deploy:merkle-drop', 'Deploys cumulative merkle drop contract')
+    .addParam('t', 'Token address')
+    .setAction(async (taskArgs, hre) => {
+        const deploymentScript = require('./deploy/deploy_cumulative.js');
+        const { deployments, getNamedAccounts } = hre;
+        await deploymentScript({
+            deployments,
+            getNamedAccounts,
+            tokenAddress: taskArgs.t,
+        });
+    });
 
 module.exports = {
     etherscan,
@@ -46,6 +71,7 @@ module.exports = {
             default: 0,
         },
     },
+    etherscan,
     networks,
     dependencyCompiler: {
         paths: [

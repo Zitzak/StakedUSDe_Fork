@@ -5,9 +5,9 @@
   "scripts": {
     "build": "forge build",
     "test": "forge test -vvv",
-    "deploy": "forge script",
-    "generate-abis": "node scripts/generate-abis.js",
-    "clean": "forge clean"
+    "deploy:staked-piku": "forge script script/StakeDeployment.sol:StakeDeployment --broadcast --verify -vvvv",
+    "clean": "forge clean",
+    "with-env": "dotenv -e ./.env --"
   },
   "devDependencies": {
     "fs-extra": "^11.1.1",

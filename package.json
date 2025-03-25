@@ -9,11 +9,14 @@
     "build": "turbo run build",
     "test": "turbo run test",
     "clean": "turbo run clean",
-    "deploy": "turbo run deploy",
-    "generate-abis": "turbo run generate-abis"
+    "deploy:staked-piku": "turbo run deploy:staked-piku --filter=staked-piku --",
+    "deploy:merkle-drop": "turbo run deploy:merkle-drop --filter=merkle-distribution --",
+    "deploy:merkle-drop:withTransferOwner": "turbo run deploy:merkle-drop:withTransferOwner --filter=merkle-distribution --",
+    "generate-abis": "turbo run generate-abis --filter=shared-abi"
   },
   "devDependencies": {
-    "turbo": "^2.4.4"
+    "turbo": "^2.4.4",
+    "dotenv": "16.4.5"
   },
   "packageManager": "yarn@1.22.18"
 }

@@ -3,8 +3,12 @@
     "version": "1.0.0",
     "private": true,
     "main": "index.js",
+    "exports": {
+      ".": "./index.js",
+      "./addresses": "./addresses.js"
+    },
     "scripts": {
-      "build": "echo 'Nothing to build'",
+      "build": "node scripts/consolidate-abis.js",
       "generate-abis": "node scripts/consolidate-abis.js"
     },
     "devDependencies": {
